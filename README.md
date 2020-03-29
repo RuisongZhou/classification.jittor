@@ -7,6 +7,7 @@ Classification on CIFAR-10/100 and ImageNet with ![Jittor](https://github.com/Ji
 * visualize the training state.
 
 ## Result
+
 Top1 error rate on the CIFAR-10/100 benchmarks are reported. .
 * Note that the number of parameters are computed on the **CIFAR-10 dataset**.
 
