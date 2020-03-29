@@ -34,7 +34,7 @@ def train(model, train_loader, optimizer, epoch, writer):
         loss = nn.cross_entropy_loss(outputs, targets)
         optimizer.step(loss)
         if batch_idx % 10 == 0:
-            logging.info('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+            logging.info('Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     epoch, batch_idx, len(train_loader),
                     100. * batch_idx / len(train_loader), loss.data[0]))
             if writer:
@@ -55,7 +55,7 @@ def test(model, val_loader, epoch, writer):
         acc = np.sum(targets.data==pred)
         total_acc += acc
         total_num += batch_size
-        total_loss += nn.cross_entropy_loss(outputs, targets)
+        total_loss += nn.cross_entropy_loss(outputs, targets).data[0]
 
     logging.info('Total test acc = {}, test loss = {}'.format(total_acc / total_num, total_loss/total_num))
     if writer:
