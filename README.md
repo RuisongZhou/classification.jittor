@@ -1,5 +1,5 @@
 ## classification.jittor
-Classification on CIFAR-10/100 and ImageNet with ![Jittor](https://github.com/Jittor/jittor).
+Classification on CIFAR-10/100 and ImageNet with [Jittor](https://github.com/Jittor/jittor).
 
 ## Features
 * Unified interface for different network architectures
@@ -9,7 +9,7 @@ Classification on CIFAR-10/100 and ImageNet with ![Jittor](https://github.com/Ji
 ## Install 
 1. Download the CIFAT-10 Dataset and put it into `./data/cifar`
 2. Run commond to run
-```python
+```shell
 python cifar_train.py --model resnet18 --cuda
 ```
 ## Result
