@@ -11,6 +11,7 @@ import jittor.transform as trans
 from cifar_dataloader import cifar_dataset
 import argparse
 from tensorboardX import SummaryWriter
+import pickle
 parser = argparse.ArgumentParser(description='train cifar10')
 parser.add_argument('--bs', default=64, type=int, help='batch size')
 parser.add_argument('--train_size', default=32, type=int, help='train size')
@@ -19,6 +20,7 @@ parser.add_argument('--model',required=True, type=str, help='choose model')
 parser.add_argument('--save_path', default='./weights', type=str, help='model save_path')
 parser.add_argument('--epochs', default=100, type=int, help='train epochs')
 parser.add_argument('--cuda', action='store_true',help='whether to use GPU for training')
+parser.add_argument('--resume', default=None, type=str)
 parser.add_argument('--visual', action='store_true',help='whether to visual the training state')
 args = parser.parse_args()
 
@@ -57,17 +59,26 @@ def test(model, val_loader, epoch, writer):
         total_num += batch_size
         total_loss += nn.cross_entropy_loss(outputs, targets).data[0]
 
-    logging.info('Total test acc = {}, test loss = {}'.format(total_acc / total_num, total_loss/total_num))
+    logging.info('test acc = {}, test loss = {}'.format(total_acc / total_num, total_loss/batch_idx))
     if writer:
         writer.add_scalar('Test/acc', total_acc / total_num, global_step=epoch)
-        writer.add_scalar('Test/loss',total_loss / total_num, global_step=epoch)
+        writer.add_scalar('Test/loss',total_loss / batch_idx, global_step=epoch)
     return total_acc / total_num
 
 
 def choose_model():
     if args.model == 'resnet18':
         from models.resnet18 import ResNet18
-        model = ResNet18()
+        model = ResNet18(num_classes=10)
+    elif args.model == 'mobilenetv2':
+        from models.mobilenetv2 import MobileNetV2
+        model = MobileNetV2(num_classes=10)
+    elif args.model == 'densenet121':
+        from models.densenet import DenseNet121
+        model = DenseNet121()
+    elif args.model == 'senet18':
+        from models.senet import SENet18
+        model = SENet18()
     else:
         logging.fatal("The net type is wrong.")
         parser.print_help(sys.stderr)
@@ -96,17 +107,25 @@ def main ():
     train_loader = cifar_dataset(is_train=True, transform=train_transform).set_attrs(batch_size=batch_size, shuffle=True)
     val_loader = cifar_dataset(is_train=False, transform=test_transform).set_attrs(batch_size=batch_size, shuffle=False)
     model = choose_model()
+    start_ep = 0
+    if args.resume:
+        pkl_file = open(args.resume, 'rb')
+        params = pickle.load(pkl_file)
+        model.load_parameters(params)
+        start_ep = int(args.resume.split('_')[2])
+        logging.info("Loaded Model Successfully")
     optimizer = nn.SGD(model.parameters(), learning_rate, momentum= 0.9, weight_decay=1e-4)
 
     decay_lr_at = [epochs//2,int(epochs//(4/3))]
-    for epoch in range(epochs):
+    best_acc = 0
+    for epoch in range(start_ep, epochs):
         if epoch in decay_lr_at:
             optimizer.lr *= 0.1
         train(model, train_loader, optimizer, epoch, writer)
-        if (epoch+1) % 5 == 0:
-            acc = test(model, val_loader, (epoch+1), writer)
+        acc = test(model, val_loader, (epoch + 1), writer)
+        if acc > best_acc and epoch > 10:
             model.save(os.path.join(args.save_path, '{}_epoch_{}_acc_{}.pkl'.format(args.model, (epoch+1),acc)))
-
+            best_acc = acc
 
 if __name__ =='__main__':
     main()
