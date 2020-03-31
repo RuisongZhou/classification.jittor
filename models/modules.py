@@ -33,7 +33,6 @@ class DWConv(Module):
     def execute(self, x):
         N, C, H, W = x.shape
         Kh, Kw = self.kernel_size
-        # assert C==self.in_channels
         oh = (H + self.padding[0] * 2 - Kh * self.dilation[0] + self.dilation[0] - 1) // self.stride[0] + 1
         ow = (W + self.padding[1] * 2 - Kw * self.dilation[1] + self.dilation[1] - 1) // self.stride[1] + 1
 
