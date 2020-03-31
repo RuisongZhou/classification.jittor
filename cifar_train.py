@@ -70,6 +70,9 @@ def choose_model():
     if args.model == 'resnet18':
         from models.resnet18 import ResNet18
         model = ResNet18(num_classes=10)
+    elif args.model == 'preact_resnet18':
+        from models.preact_resnet import PreActResNet18
+        model = PreActResNet18()
     elif args.model == 'mobilenetv2':
         from models.mobilenetv2 import MobileNetV2
         model = MobileNetV2(num_classes=10)
